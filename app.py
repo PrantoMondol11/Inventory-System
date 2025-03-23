@@ -1,1 +1,1 @@
-print("Hello word")
+from flask import Flask
