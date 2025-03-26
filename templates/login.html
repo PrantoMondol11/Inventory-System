@@ -1,3 +1,63 @@
-<h>
-    this is login page
-</h>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>LOGIN Form</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>login form</h2>
+  <form action="/login" method="POST">
+    {{ form.hidden_tag() }}
+
+
+    <div class="form-group">
+        {{ form.email.label(for="email") }}
+        {{ form.email(id="email", class="form-control") }}
+        {% if form.email.errors %}
+        <ul class="text-danger">
+            {% for error in form.email.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form.password.label(for="password") }}
+        {{ form.password(id="password", class="form-control") }}
+        {% if form.password.errors %}
+        <ul class="text-danger">
+            {% for error in form.password.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    {{ form.submit(class="btn btn-primary mt-4") }}
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="flashes">
+            <ul>
+                {% for message in messages %}
+                <li >{{ message }}</li>
+                {% endfor %}        
+            </ul>
+        </div>
+    {% endif %}
+{% endwith %}
+
+  </form>
+</div>
+
+<a href ="/signup" class="btn btn primary">SignUp</a>
+
+</body>
+</html>
