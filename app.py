@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, session,flash,request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Email
+from wtforms.validators import DataRequired, Email,ValidationError
 from flask_bcrypt import Bcrypt
 from flask_mysqldb import MySQL
 
@@ -24,16 +24,45 @@ class RegisterForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Register")
+    
+    def validate_email(self,field):
+        cursor=mysql.connection.cursor()
+        cursor.execute("SELECT * FROM user where email=%s",(field.data,))
+        user=cursor.fetchone()
+        cursor.close()
+        if user:
+            raise ValidationError("Email is already taken.")
+    
+    
+class loginForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Login")
+
 
 # Routes
 @app.route("/")
 def home():
     return render_template('home.html')
 
-@app.route("/login")
+@app.route("/login",methods=["GET","POST"])
 def login():
-    return render_template('login.html')
-
+    form =loginForm()
+    if form.validate_on_submit():
+        email=form.email.data
+        password=form.password.data
+        
+        cursor=mysql.connection.cursor()
+        cursor.execute("SELECT * FROM user WHERE email=%s",(email,))
+        user=cursor.fetchone()
+        cursor.close()
+        if user and bcrypt.check_password_hash(user[3],password):
+            session['user_id']=user[0]
+            return redirect(url_for('Dashboard'))
+        else :
+            flash("Login failed")
+            return redirect('login')
+    return render_template("login.html",form=form)
 @app.route("/signup", methods=['GET', 'POST'])
 def signup():
     form = RegisterForm()
@@ -57,7 +86,19 @@ def signup():
 
 @app.route("/Dashboard")
 def Dashboard():
-    return render_template('Dashboard.html')
-
+    if 'user_id' in session:
+        user_id =session['user_id']
+        cursor = mysql.connection.cursor()
+        cursor.execute("SELECT * FROM user where id =%s",(user_id,))
+        user=cursor.fetchone()
+        cursor.close()
+    if user:
+        return render_template('Dashboard.html',user=user)
+    return redirect(url_for("login"))
+@app.route("/logout")
+def logout():
+    session.pop("user_id",None)
+    flash("You have been log out successfully.")
+    return redirect(url_for("login"))
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
