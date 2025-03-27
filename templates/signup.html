@@ -44,6 +44,20 @@
         {% endif %}
     </div>
 
+    <div class="mb-3">
+        <label for="role" class="form-label">Role</label>
+        {% if roles %}
+            <select class="form-select" id="role" name="role">
+                {% for role in roles %}
+                    <option value="{{ role }}">{{ role }}</option>
+                {% endfor %}
+            </select>
+        {% else %}
+            <p>No roles available</p>
+        {% endif %}
+    </div>
+    
+
     {{ form.submit(class="btn  mt-4 btn-lg btn-outline-success") }}
 
   </form>
