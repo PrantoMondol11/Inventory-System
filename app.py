@@ -15,6 +15,26 @@ app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'mydatabase'
 app.secret_key = 'my_secret_key_here'
 
+def get_enum_values():
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute("SHOW COLUMNS FROM user LIKE 'role'")
+        result = cursor.fetchone()
+        cursor.close()
+
+        if result:
+            # Extract ENUM values from the result
+            enum_str = result[1]  # This contains the ENUM values in a string
+            enum_values = enum_str.replace("enum(", "").replace(")", "").replace("'", "").split(",")
+            return enum_values
+        else:
+            return []  # Return an empty list if no 'role' column or ENUM found
+    except Exception as e:
+        print("Error fetching enum values:", e)
+        return []  # Return an empty list if an error occurs
+
+
+
 mysql = MySQL(app)
 bcrypt = Bcrypt(app)  # ✅ Correctly initializing Bcrypt
 
@@ -23,6 +43,7 @@ class RegisterForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
+    role = StringField("Role", validators=[DataRequired()])
     submit = SubmitField("Register")
     
     def validate_email(self,field):
@@ -41,6 +62,7 @@ class loginForm(FlaskForm):
 
 
 # Routes
+
 @app.route("/")
 def home():
     return redirect('login')
@@ -65,24 +87,33 @@ def login():
     return render_template("login.html",form=form,active_page='login')
 @app.route("/signup", methods=['GET', 'POST'])
 def signup():
+    # Initialize roles to an empty list by default
+    roles = get_enum_values()  # Get enum values
+
+    if not roles:
+        roles = []  # If roles is empty, ensure it's set to an empty list
+
     form = RegisterForm()
+    
     if form.validate_on_submit():
         name = form.name.data
         email = form.email.data
         password = form.password.data
 
-        # ✅ Correctly Hashing the Password
+        # Hash the password before storing in the database
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
-        # Store in database
+        # Insert user into the database
         cursor = mysql.connection.cursor()
-        cursor.execute("INSERT INTO user (name, email, password) VALUES (%s, %s, %s)", (name, email, hashed_password))
-        mysql.connection.commit()  # ✅ Fixed commit method
+        cursor.execute("INSERT INTO user (name, email, password, role) VALUES (%s, %s, %s, %s)", 
+                       (name, email, hashed_password, form.role.data))
+        mysql.connection.commit()
         cursor.close()
 
         return redirect(url_for('login'))
     
-    return render_template('signup.html', form=form,active_page='signup')
+    return render_template("signup.html", form=form, active_page='signup', roles=roles)
+
 
 @app.route("/Dashboard")
 def Dashboard():
@@ -104,5 +135,6 @@ def logout():
     session.pop("user_id",None)
     flash("You have been log out successfully.")
     return redirect(url_for("login"))
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
