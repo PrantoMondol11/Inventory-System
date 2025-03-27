@@ -41,7 +41,7 @@ class loginForm(FlaskForm):
 
 
 # Routes
-@app.route("/")
+@app.route("/home")
 def home():
     return render_template('home.html')
 
@@ -62,7 +62,7 @@ def login():
         else :
             flash("Login failed")
             return redirect('login')
-    return render_template("login.html",form=form)
+    return render_template("login.html",form=form,active_page='login')
 @app.route("/signup", methods=['GET', 'POST'])
 def signup():
     form = RegisterForm()
@@ -82,7 +82,7 @@ def signup():
 
         return redirect(url_for('login'))
     
-    return render_template('signup.html', form=form)
+    return render_template('signup.html', form=form,active_page='signup')
 
 @app.route("/Dashboard")
 def Dashboard():
@@ -92,9 +92,13 @@ def Dashboard():
         cursor.execute("SELECT * FROM user where id =%s",(user_id,))
         user=cursor.fetchone()
         cursor.close()
+    else :
+        user=None
     if user:
-        return render_template('Dashboard.html',user=user)
-    return redirect(url_for("login"))
+        return render_template('Dashboard.html',user=user,active_page='Dashboard')
+    else :
+        
+        return render_template('Dashboard.html',user=user,active_page='Dashboard')
 @app.route("/logout")
 def logout():
     session.pop("user_id",None)
