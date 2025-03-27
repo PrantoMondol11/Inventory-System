@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>SignUp Form</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-</head>
+{% include 'home.html' %}
+
 <body>
+    {%include 'navbar.html'%}
 
 <div class="container">
   <h2>Signup form</h2>
@@ -51,11 +44,13 @@
         {% endif %}
     </div>
 
-    {{ form.submit(class="btn btn-primary mt-4") }}
+    {{ form.submit(class="btn  mt-4 btn-lg btn-outline-success") }}
 
   </form>
-  <a href='/login' class="btn btn-primary ",>Login</a>
-</div>
+  <a href='/login' class="btn px-5 mt-4 btn-outline-warning">Login</a>
+
+
+    
+
 
 </body>
-</html>

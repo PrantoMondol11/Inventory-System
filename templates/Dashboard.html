@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>LOGIN Form</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-</head>
+{%include 'home.html'%}
+
 <body>
+    {%include 'navbar.html'%}
 
 <div class="container">
   <h2> Welcome to the Dashboard</h2>
@@ -19,13 +12,16 @@
         <li> Name: {{user[1]}}</li>
          <li> Email:{{user[2]}} </li>  
     </ul>
-
+    <a href="/logout" class="btn btn-dark">logout</a>
+    {%else%}
+    <p>No data to show</p>
+    <a href="/login" class="btn btn-dark">login</a>
     {%endif%}
 </div>
 <div class="container">
-<a href="/logout" class="btn btn-dark">logout</a>
+
 
 </div>
 
 </body>
-</html>
+
