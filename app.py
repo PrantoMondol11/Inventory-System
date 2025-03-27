@@ -43,7 +43,7 @@ class loginForm(FlaskForm):
 # Routes
 @app.route("/")
 def home():
-    return render_template('login.html')
+    return redirect('login')
 
 @app.route("/login",methods=["GET","POST"])
 def login():
