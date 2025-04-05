@@ -4,6 +4,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email,ValidationError
 from flask_bcrypt import Bcrypt
 from flask_mysqldb import MySQL
+from wtforms import SelectField
 
 app = Flask(__name__)
 
@@ -43,7 +44,7 @@ class RegisterForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
-    role = StringField("Role", validators=[DataRequired()])
+    role = SelectField("Role", choices=[], validators=[DataRequired()])
     submit = SubmitField("Register")
     
     def validate_email(self,field):
@@ -60,6 +61,16 @@ class loginForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
     submit = SubmitField("Login")
 
+class CommitteeForm(FlaskForm):
+    name = StringField("Committee Name", validators=[DataRequired()])
+    submit = SubmitField("Create Committee")
+
+
+
+
+class AddMemberForm(FlaskForm):
+    user_id = SelectField("Select User", coerce=int, validators=[DataRequired()])
+    submit = SubmitField("Add Member")
 
 # Routes
 
@@ -135,6 +146,68 @@ def logout():
     session.pop("user_id",None)
     flash("You have been log out successfully.")
     return redirect(url_for("login"))
+
+@app.route("/committees/create", methods=['GET', 'POST'])
+def create_committee():
+    form = CommitteeForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        cursor = mysql.connection.cursor()
+        cursor.execute("INSERT INTO committees (name) VALUES (%s)", (name,))
+        mysql.connection.commit()
+        cursor.close()
+        flash("Committee created successfully.")
+        return redirect(url_for("list_committees"))
+    return render_template("create_committee.html", form=form)
+
+@app.route("/committees")
+def list_committees():
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM committees")
+    committees = cursor.fetchall()
+    cursor.close()
+    return render_template("committees.html", committees=committees)
+
+@app.route("/committees/<int:committee_id>/add_member", methods=['GET', 'POST'])
+def add_member(committee_id):
+    form = AddMemberForm()
+
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT id, name FROM user")
+    users = cursor.fetchall()
+    form.user_id.choices = [(u[0], u[1]) for u in users]
+
+    if form.validate_on_submit():
+        user_id = form.user_id.data
+        cursor.execute("INSERT INTO committee_members (user_id, committee_id) VALUES (%s, %s)", 
+                       (user_id, committee_id))
+        mysql.connection.commit()
+        cursor.close()
+        flash("Member added successfully.")
+        return redirect(url_for("view_committee", committee_id=committee_id))
+
+    return render_template("add_member.html", form=form)
+
+
+@app.route("/committees/<int:committee_id>")
+def view_committee(committee_id):
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT name FROM committees WHERE id=%s", (committee_id,))
+    committee = cursor.fetchone()
+
+    cursor.execute("""
+        SELECT u.id, u.name, u.email 
+        FROM user u
+        JOIN committee_members cm ON u.id = cm.user_id
+        WHERE cm.committee_id = %s
+    """, (committee_id,))
+    members = cursor.fetchall()
+    cursor.close()
+
+    return render_template("view_committee.html", committee=committee, members=members)
+
+        
+        
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
