@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Committees</title>
+</head>
+<body>
+    <h2>List of Committees</h2>
+    <ul>
+        {% for committee in committees %}
+            <li>
+                <a href="{{ url_for('view_committee', committee_id=committee[0]) }}">{{ committee[1] }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('create_committee') }}">Create New Committee</a>
+</body>
+</html>

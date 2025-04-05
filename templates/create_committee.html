@@ -1,0 +1,16 @@
+{%include 'home.html'%}
+<body>
+
+    {%include 'navbar.html'%}
+    <h2>Create a New Committee</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.name.label }}<br>
+            {{ form.name(size=32) }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    <a href="{{ url_for('list_committees') }}">Back to Committees</a>
+</body>
+</html>

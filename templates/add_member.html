@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Member to Committee</title>
+</head>
+<body>
+    <h2>Add Member</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.user_id.label }}<br>
+            {{ form.user_id() }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+    <a href="{{ url_for('view_committee', committee_id=request.view_args['committee_id']) }}">Back to Committee</a>
+</body>
+</html>

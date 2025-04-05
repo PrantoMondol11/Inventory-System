@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Committee Details</title>
+</head>
+<body>
+    <h2>Committee: {{ committee[0] }}</h2>
+
+    <h3>Members:</h3>
+    <ul>
+        {% for member in members %}
+            <li>{{ member[1] }} ({{ member[2] }})</li>
+        {% else %}
+            <li>No members yet.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('add_member', committee_id=request.view_args['committee_id']) }}">Add Member</a><br>
+    <a href="{{ url_for('list_committees') }}">Back to Committees</a>
+</body>
+</html>
