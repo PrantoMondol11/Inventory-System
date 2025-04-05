@@ -1,6 +1,6 @@
 from flask import Flask, render_template, session,flash,request, redirect, url_for
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField,TextAreaField
 from wtforms.validators import DataRequired, Email,ValidationError
 from flask_bcrypt import Bcrypt
 from flask_mysqldb import MySQL
@@ -71,6 +71,17 @@ class CommitteeForm(FlaskForm):
 class AddMemberForm(FlaskForm):
     user_id = SelectField("Select User", coerce=int, validators=[DataRequired()])
     submit = SubmitField("Add Member")
+    
+class ProjectForm(FlaskForm):
+    name = StringField("Project Name", validators=[DataRequired()])
+    description = TextAreaField("Description")
+    status = SelectField("Status", choices=[
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('completed', 'Completed')
+    ])
+    submit = SubmitField("Create Project")
+
 
 # Routes
 
@@ -202,11 +213,58 @@ def view_committee(committee_id):
         WHERE cm.committee_id = %s
     """, (committee_id,))
     members = cursor.fetchall()
+
+    # Get existing projects for the committee
+    cursor.execute("SELECT * FROM project WHERE committee_id = %s", (committee_id,))
+    projects = cursor.fetchall()
+
     cursor.close()
 
-    return render_template("view_committee.html", committee=committee, members=members)
+    return render_template("view_committee.html", 
+                           committee=committee, 
+                           members=members, 
+                           projects=projects, 
+                           committee_id=committee_id)
 
-        
+@app.route("/committees/<int:committee_id>/projects/create", methods=["GET", "POST"])
+def create_project(committee_id):
+    form = ProjectForm()
+
+    if form.validate_on_submit():
+        name = form.name.data
+        description = form.description.data
+        status = form.status.data
+
+        cursor = mysql.connection.cursor()
+        cursor.execute("""
+            INSERT INTO project (name, description, status, committee_id)
+            VALUES (%s, %s, %s, %s)
+        """, (name, description, status, committee_id))
+        mysql.connection.commit()
+        cursor.close()
+
+        flash("✅ Project created successfully.")
+        return redirect(url_for('view_committee', committee_id=committee_id))
+
+    return render_template("create_project.html", form=form, committee_id=committee_id)
+
+
+
+
+
+
+
+@app.route("/committees/<int:committee_id>/projects")
+def list_projects(committee_id):
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM project WHERE committee_id = %s", (committee_id,))
+    projects = cursor.fetchall()
+    cursor.close()
+
+    return render_template("project_list.html", projects=projects, committee_id=committee_id)
+
+
+
         
 
 if __name__ == "__main__":
