@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Projects Under This Committee</h2>
+    <a href="{{ url_for('create_project', committee_id=committee_id) }}" class="btn btn-success mb-3">+ Create Project</a>
+
+    {% if projects %}
+        <ul class="list-group">
+            {% for project in projects %}
+                <li class="list-group-item">
+                    <h5>{{ project[1] }}</h5>
+                    <p>{{ project[2] }}</p>
+                    <span class="badge bg-info text-dark">Status: {{ project[3] }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No projects available.</p>
+    {% endif %}
+</div>
+{% endblock %}

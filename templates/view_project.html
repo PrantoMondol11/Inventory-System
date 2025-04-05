@@ -1,0 +1,18 @@
+{%include 'home.html'%}
+<body>
+    {%include 'navbar.html'%}
+    <h2>Project Details</h2>
+
+    <!-- Display Project Data -->
+    <div>
+        <strong>Project Name:</strong> {{ project[1] }} <br>
+        <strong>Description:</strong> {{ project[2] }} <br>
+        <strong>Status:</strong> {{ project[3] }} <br>
+        <strong>Created At:</strong> {{ project[4] }} <br>
+    </div>
+
+    <br>
+    <!-- Back to the list of projects for this committee -->
+    <a href="{{ url_for('list_projects', committee_id=committee_id) }}">🔙 Back to Projects</a>
+
+</body>

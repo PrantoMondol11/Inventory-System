@@ -1,0 +1,34 @@
+{%include 'home.html'%}
+<body>
+    {%include 'navbar.html'%}
+    <h2>Create New Project for Committee ID: {{ committee_id }}</h2>
+
+    <!-- Form for creating project -->
+    <form method="POST" action="{{ url_for('create_project', committee_id=committee_id) }}">
+        {{ form.hidden_tag() }}
+
+        <div>
+            <label for="name">{{ form.name.label }}</label>
+            {{ form.name(class="form-control") }}
+        </div>
+        
+        <div>
+            <label for="description">{{ form.description.label }}</label>
+            {{ form.description(class="form-control", rows=5) }}
+        </div>
+
+        <div>
+            <label for="status">{{ form.status.label }}</label>
+            {{ form.status(class="form-control") }}
+        </div>
+
+        <div>
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+
+    <br>
+    <!-- Link to go back to the committee's page -->
+    <a href="{{ url_for('view_committee', committee_id=committee_id) }}">🔙 Back to Committee</a>
+</body>
+
